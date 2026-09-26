@@ -1,0 +1,14 @@
+# requirements.txt cheatsheet
+
+# pkg_name
+# pkg_name==ver
+# pkg_name>=ver
+# pkg_name<=ver
+# git+repo_url
+
+# Python Libraries
+
+numpy
+pandas
+matplotlib
+scikit-learn
