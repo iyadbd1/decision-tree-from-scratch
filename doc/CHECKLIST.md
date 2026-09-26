@@ -6,15 +6,15 @@ Companion to `PROBLEM_STATEMENT.md`. Check items off in order — each phase sho
 ---
 
 ### Phase 0 — Repository & Environment Setup
-- [ ] GitHub repository created with a clear, professional name
-- [ ] Repo initialized locally / cloned
-- [ ] `.gitignore` added (Python-appropriate)
-- [ ] Virtual environment set up
-- [ ] `requirements.txt` or `pyproject.toml` created
-- [ ] Folder skeleton created (source / tests / notebooks / docs separated)
+- [x] GitHub repository created with a clear, professional name
+- [x] Repo initialized locally / cloned
+- [x] `.gitignore` added (Python-appropriate)
+- [x] Virtual environment set up
+- [x] `requirements.txt` or `pyproject.toml` created
+- [x] Folder skeleton created (source / tests / notebooks / docs separated)
 - [ ] `LICENSE` file added
-- [ ] Empty/placeholder `README.md` committed
-- [ ] First commit pushed to GitHub
+- [x] Empty/placeholder `README.md` committed
+- [x] First commit pushed to GitHub
 
 ### Phase 1 — Problem Framing & Dataset Selection
 - [ ] Simple/small debug dataset chosen
