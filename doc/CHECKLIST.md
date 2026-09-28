@@ -29,11 +29,11 @@ Companion to `PROBLEM_STATEMENT.md`. Check items off in order — each phase sho
 - [x] Hyperparameters chosen and justified
 - [x] Node data structure defined
 - [x] Stopping conditions defined
-- [ ] Tie-breaking / edge-case handling defined
+- [x] Tie-breaking / edge-case handling defined
 - [ ] Design written in `docs/` **before** any implementation code
 
 ### Phase 3 — Decision Tree: Implementation
-- [ ] Class implemented per the Phase 2 design
+- [x] Class implemented per the Phase 2 design
 - [ ] Follows clean OOP practice (naming, single-responsibility, docstrings, type hints)
 - [ ] Works with NumPy arrays as input
 - [ ] `fit` / `predict` (/ `predict_proba`) implemented
