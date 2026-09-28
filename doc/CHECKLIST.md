@@ -19,7 +19,7 @@ Companion to `PROBLEM_STATEMENT.md`. Check items off in order — each phase sho
 ### Phase 1 — Problem Framing & Dataset Selection
 - [x] Simple/small debug dataset chosen
 - [ ] Moderately complex benchmark dataset chosen
-- [ ] Dataset notes documented (size, features, classes, balance)
+- [x] Dataset notes documented (size, features, classes, balance)
 - [ ] Train/val/test split strategy decided and justified
 - [x] Preprocessing done via sklearn utilities (scope-compliant)
 - [ ] One-sentence problem framing written per dataset
@@ -28,7 +28,7 @@ Companion to `PROBLEM_STATEMENT.md`. Check items off in order — each phase sho
 - [ ] Public API sketched (constructor params, `fit`, `predict`, etc.)
 - [x] Hyperparameters chosen and justified
 - [x] Node data structure defined
-- [ ] Stopping conditions defined
+- [x] Stopping conditions defined
 - [ ] Tie-breaking / edge-case handling defined
 - [ ] Design written in `docs/` **before** any implementation code
 
