@@ -17,17 +17,17 @@ Companion to `PROBLEM_STATEMENT.md`. Check items off in order — each phase sho
 - [x] First commit pushed to GitHub
 
 ### Phase 1 — Problem Framing & Dataset Selection
-- [ ] Simple/small debug dataset chosen
+- [x] Simple/small debug dataset chosen
 - [ ] Moderately complex benchmark dataset chosen
 - [ ] Dataset notes documented (size, features, classes, balance)
 - [ ] Train/val/test split strategy decided and justified
-- [ ] Preprocessing done via sklearn utilities (scope-compliant)
+- [x] Preprocessing done via sklearn utilities (scope-compliant)
 - [ ] One-sentence problem framing written per dataset
 
 ### Phase 2 — Decision Tree: Design Before Code
 - [ ] Public API sketched (constructor params, `fit`, `predict`, etc.)
-- [ ] Hyperparameters chosen and justified
-- [ ] Node data structure defined
+- [x] Hyperparameters chosen and justified
+- [x] Node data structure defined
 - [ ] Stopping conditions defined
 - [ ] Tie-breaking / edge-case handling defined
 - [ ] Design written in `docs/` **before** any implementation code
