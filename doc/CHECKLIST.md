@@ -39,7 +39,7 @@ Companion to `PROBLEM_STATEMENT.md`. Check items off in order — each phase sho
 - [x] `fit` / `predict` (/ `predict_proba`) implemented
 - [x] No notebook-only logic — class is cleanly importable
 - [x] Committed incrementally (not one giant commit)
-- [ ] Runs end-to-end on the simple dataset without crashing
+- [x] Runs end-to-end on the simple dataset without crashing
 
 ### Phase 4 — Decision Tree: Validation & Debugging
 - [ ] 3+ hand-checkable test cases designed and verified
