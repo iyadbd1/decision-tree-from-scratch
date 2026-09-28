@@ -34,7 +34,7 @@ Companion to `PROBLEM_STATEMENT.md`. Check items off in order — each phase sho
 
 ### Phase 3 — Decision Tree: Implementation
 - [x] Class implemented per the Phase 2 design
-- [ ] Follows clean OOP practice (naming, single-responsibility, docstrings, type hints)
+- [x] Follows clean OOP practice (naming, single-responsibility, docstrings, type hints)
 - [ ] Works with NumPy arrays as input
 - [ ] `fit` / `predict` (/ `predict_proba`) implemented
 - [ ] No notebook-only logic — class is cleanly importable
