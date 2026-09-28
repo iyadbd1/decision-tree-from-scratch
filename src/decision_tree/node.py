@@ -1,4 +1,5 @@
 from scipy.stats import entropy
+import numpy as np
 
 class DecisionTreeNode:
     """
@@ -78,13 +79,13 @@ class DecisionTreeNode:
         Returns:
             (int, int): feature and threshold to split    
         """
-        if not X_train or not y_train:
+        if not self.X_train or not self.y_train:
             raise ValueError("Cannot split node with no data X_train, y_train")
         
         # partitions the data to two subsets based on the best split
-        m, n = X_train.shape
+        m, n = self.X_train.shape
         
-        e = entropy(y_train)
+        e = entropy(self.y_train)
         
         best_gini = -1
         best_ig = -1
@@ -93,14 +94,14 @@ class DecisionTreeNode:
         
         for j in range(n):
             # sort the data with respect to the jth feature
-            sorted_indices = np.argsort(X_train[:,j])
-            sorted_labels = y_train[sorted_indices]
+            sorted_indices = np.argsort(self.X_train[:,j])
+            sorted_labels = self.y_train[sorted_indices]
             for i in range(m-1):
                 # determine the threshold to split data on
-                t = np.mean(X_train[i, j], X_train[i+1, j])
+                t = np.mean(self.X_train[i, j], self.X_train[i+1, j])
                 
-                y_left = y_train[X_train[j] <= t]
-                y_right = y_train[X_train[j] > t]
+                y_left = self.y_train[self.X_train[j] <= t]
+                y_right = self.y_train[self.X_train[j] > t]
                 
                 # calculate the split criteria
                 if split_method.lower() == "gini":
@@ -110,7 +111,7 @@ class DecisionTreeNode:
                         best_feat = j
                         best_thrs = t
                 elif split_method.lower() in ["ig", "information gain", "gain"]:
-                    ig = e - ((y_left.shape[0] / y_train.shape[0]) * entropy(y_left) + (y_right.shape[0] / y_train.shape[0]) * entropy(y_right))
+                    ig = e - ((y_left.shape[0] / self.y_train.shape[0]) * entropy(y_left) + (y_right.shape[0] / self.y_train.shape[0]) * entropy(y_right))
                     if ig > best_ig:
                         best_ig = ig
                         best_feat = j
@@ -139,10 +140,10 @@ class DecisionTreeNode:
         if not self.split_feat or not self.split_thrs:
             self.find_split()     
         
-        X_left = X_train[X_train[self.split_feat] <= self.split_thrs]
-        y_left = y_train[X_train[self.split_feat] <= self.split_thrs]
-        X_right = X_train[X_train[self.split_feat] > self.split_thrs]
-        y_right = y_train[X_train[self.split_feat] > self.split_thrs]
+        X_left = self.X_train[self.X_train[self.split_feat] <= self.split_thrs]
+        y_left = self.y_train[self.X_train[self.split_feat] <= self.split_thrs]
+        X_right = self.X_train[self.X_train[self.split_feat] > self.split_thrs]
+        y_right = self.y_train[self.X_train[self.split_feat] > self.split_thrs]
         
         self.lc = DecisionTreeNode(X_left, y_left)
         self.rc = DecisionTreeNode(X_right, y_right)

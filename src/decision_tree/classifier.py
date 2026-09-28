@@ -1,5 +1,6 @@
 from node import DecisionTreeNode
 from utils import majority_vote, predict_proba_classes
+import numpy as np
 
 class DecisionTreeClassifier:
     """
