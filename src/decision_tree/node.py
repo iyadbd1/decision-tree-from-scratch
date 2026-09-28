@@ -29,12 +29,47 @@ class DecisionTreeNode:
     
         self.lc = None
         self.rc = None
+        self.d = 0
         
-        self.gini = -1
-        self.ig = -1
+        self.gini = None
+        self.ig = None
+        
+        self.split_feat = None
+        self.split_thrs = None
     
-    def __calc_gini(self, p):
+    def __calc_gini_impurity(self, y):
+        """Calculate Gini impurity for a single node"""
+        if len(y) == 0:
+            return 0
+        
+        # Get class probabilities
+        _, counts = np.unique(y, return_counts=True)
+        p = counts / len(y)
+        
+        # Gini formula: 1 - sum(p_i^2)
         return 1 - np.sum(p ** 2)
+
+    def __calc_weighted_gini_after_split(self, y_left, y_right):
+        """
+        Calculate weighted Gini impurity after a split.
+        This is what we minimize to find the best split.
+        """
+        n_total = len(y_left) + len(y_right)
+        
+        # Handle edge case: empty split
+        if n_total == 0:
+            return 0
+        
+        # Calculate Gini for each partition
+        gini_left = self.__calc_gini_impurity(y_left)
+        gini_right = self.__calc_gini_impurity(y_right)
+        
+        # Weighted average (weighted by partition size)
+        weighted_gini = (len(y_left) / n_total) * gini_left + \
+                        (len(y_right) / n_total) * gini_right
+        
+        return weighted_gini
+
     
     def depth(self) -> int:
         """
@@ -72,46 +107,65 @@ class DecisionTreeNode:
         
         return count
         
-    def find_split(self, split_method: str="ig", update_split_criteria: bool=True) -> tuple[int, float]:
+    def find_split(self, split_method: str="gini", update_split_criteria: bool=True) -> tuple[int, float]:
         """
         Determines and sets the feature and threshold pair that results in the best split
 
         Returns:
             (int, int): feature and threshold to split    
         """
-        if not self.X_train or not self.y_train:
-            raise ValueError("Cannot split node with no data X_train, y_train")
         
         # partitions the data to two subsets based on the best split
         m, n = self.X_train.shape
         
-        e = entropy(self.y_train)
+        _, counts = np.unique(self.y_train, return_counts=True)
+        probabilities = counts / counts.sum()
+        e = entropy(probabilities, base=2)
         
-        best_gini = -1
+        best_gini = 1
         best_ig = -1
         best_feat = 0
         best_thrs = 0
         
         for j in range(n):
             # sort the data with respect to the jth feature
-            sorted_indices = np.argsort(self.X_train[:,j])
-            sorted_labels = self.y_train[sorted_indices]
+            sort_idx = np.argsort(self.X_train[:, j])
+            Xj_sorted = self.X_train[sort_idx, j]  # Only sort column j
+            y_sorted = self.y_train[sort_idx]     # Keep y aligned
+            
             for i in range(m-1):
                 # determine the threshold to split data on
-                t = np.mean(self.X_train[i, j], self.X_train[i+1, j])
+                t = (Xj_sorted[i] + Xj_sorted[i+1]) / 2
                 
-                y_left = self.y_train[self.X_train[j] <= t]
-                y_right = self.y_train[self.X_train[j] > t]
+                # Create boolean mask based on threshold
+                mask = Xj_sorted <= t
+
+                y_left = y_sorted[mask]
+                y_right = y_sorted[~mask]
                 
                 # calculate the split criteria
                 if split_method.lower() == "gini":
-                    gini = self.__calc_gini(np.array([y_left, y_right]))
-                    if gini > best_gini:
+                    gini = self.__calc_weighted_gini_after_split(y_left, y_right)
+                    if gini < best_gini:
                         best_gini = gini
                         best_feat = j
                         best_thrs = t
                 elif split_method.lower() in ["ig", "information gain", "gain"]:
-                    ig = e - ((y_left.shape[0] / self.y_train.shape[0]) * entropy(y_left) + (y_right.shape[0] / self.y_train.shape[0]) * entropy(y_right))
+                    _, counts = np.unique(y_left, return_counts=True)
+                    if len(y_left) == 0:
+                        e_left = 0
+                    else:
+                        probabilities = counts / counts.sum()
+                        e_left = entropy(probabilities, base=2)
+                    
+                    _, counts = np.unique(y_right, return_counts=True)
+                    if len(y_right) == 0:
+                        e_right = 0
+                    else:
+                        probabilities = counts / counts.sum()
+                        e_right = entropy(probabilities, base=2)
+                    
+                    ig = e - ((y_left.shape[0] / self.y_train.shape[0]) * e_left + (y_right.shape[0] / self.y_train.shape[0]) * e_right)
                     if ig > best_ig:
                         best_ig = ig
                         best_feat = j
@@ -140,13 +194,20 @@ class DecisionTreeNode:
         if not self.split_feat or not self.split_thrs:
             self.find_split()     
         
-        X_left = self.X_train[self.X_train[self.split_feat] <= self.split_thrs]
-        y_left = self.y_train[self.X_train[self.split_feat] <= self.split_thrs]
-        X_right = self.X_train[self.X_train[self.split_feat] > self.split_thrs]
-        y_right = self.y_train[self.X_train[self.split_feat] > self.split_thrs]
+        # Compute the mask ONCE
+        mask = self.X_train[:, self.split_feat] <= self.split_thrs
+
+        # Use the same mask for both X and y
+        X_left = self.X_train[mask]
+        y_left = self.y_train[mask]
+
+        # Use the inverse mask for the right partition
+        X_right = self.X_train[~mask]
+        y_right = self.y_train[~mask]
         
         self.lc = DecisionTreeNode(X_left, y_left)
         self.rc = DecisionTreeNode(X_right, y_right)
         
         return (self.lc, self.rc)
+    
     
