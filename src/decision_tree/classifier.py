@@ -1,4 +1,4 @@
-from node import DecisionTreeNode
+from .node import DecisionTreeNode
 from utils import majority_vote, predict_proba_classes
 import numpy as np
 
@@ -26,7 +26,7 @@ class DecisionTreeClassifier:
 
     def fit(
         self, X_train, y_train, min_leaf_size=-1, max_depth=-1, max_nodes=-1
-    ) -> None:
+    ) -> DecisionTreeClassifier:
         """
         Builds the decision tree based on training set and hyperparameters
         """
@@ -54,6 +54,7 @@ class DecisionTreeClassifier:
             if can_split:
                 current.split()
                 queue.extend(current.split())
+        return self
 
     def predict(self, X_test):
         """
@@ -110,3 +111,6 @@ class DecisionTreeClassifier:
                         y_pred_probs[i] = predict_proba_classes(current.y_train)
                     current = current.rc
         return y_pred_probs
+
+    def fit_predict(self, X_train, y_train, X_test, min_leaf_size=-1, max_depth=-1, max_nodes=-1):
+        return self.fit(X_train, y_train, min_leaf_size, max_depth, max_nodes).predict(X_test)
