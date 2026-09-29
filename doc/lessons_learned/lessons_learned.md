@@ -11,6 +11,7 @@
 - Python decorators
 - OOP revision
 - docstring documentation
+- pytest overview
 
 ## Environment
 
