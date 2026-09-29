@@ -69,7 +69,6 @@ class DecisionTreeNode:
                         (len(y_right) / n_total) * gini_right
         
         return weighted_gini
-
     
     def depth(self) -> int:
         """
@@ -107,7 +106,7 @@ class DecisionTreeNode:
         
         return count
         
-    def find_split(self, split_method: str="gini", update_split_criteria: bool=True) -> tuple[int, float]:
+    def find_split(self, split_method: str="gini", update_split_criteria: bool=True):
         """
         Determines and sets the feature and threshold pair that results in the best split
 
@@ -124,8 +123,8 @@ class DecisionTreeNode:
         
         best_gini = 1
         best_ig = -1
-        best_feat = 0
-        best_thrs = 0
+        best_feat = None
+        best_thrs = None
         
         for j in range(n):
             # sort the data with respect to the jth feature
@@ -134,6 +133,8 @@ class DecisionTreeNode:
             y_sorted = self.y_train[sort_idx]     # Keep y aligned
             
             for i in range(m-1):
+                if Xj_sorted[i] == Xj_sorted[i + 1]:
+                    continue
                 # determine the threshold to split data on
                 t = (Xj_sorted[i] + Xj_sorted[i+1]) / 2
                 
@@ -182,7 +183,7 @@ class DecisionTreeNode:
         
         return (self.split_feat, self.split_thrs)
     
-    def split(self) -> tuple[DecisionTreeNode, DecisionTreeNode]:
+    def split(self) -> tuple[DecisionTreeNode, DecisionTreeNode] | None:
         """
         Partitions the node according to the best split recursively until a stopping condition is reached
         
@@ -192,7 +193,10 @@ class DecisionTreeNode:
         
         
         if not self.split_feat or not self.split_thrs:
-            self.find_split()     
+            self.find_split()    
+        
+        if self.split_feat is None or self.split_thrs is None:
+            return None 
         
         # Compute the mask ONCE
         mask = self.X_train[:, self.split_feat] <= self.split_thrs

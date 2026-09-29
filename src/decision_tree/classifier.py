@@ -51,8 +51,9 @@ class DecisionTreeClassifier:
             check_depth = current_depth < max_depth
             check_size = current.size >= min_leaf_size
             check_node_count = node_count < max_nodes
-
-            can_split = check_depth and check_size and check_node_count
+            check_purity = np.unique(current.y_train).size > 1
+            
+            can_split = check_depth and check_size and check_node_count and check_purity
             
             if can_split:
                 lc, rc = current.split()

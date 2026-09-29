@@ -1,6 +1,7 @@
 from collections import Counter
 import random
 
+
 def majority_vote(classes):
     ctr = Counter(classes)
     highest_count = ctr.most_common()[0][1]
@@ -8,8 +9,9 @@ def majority_vote(classes):
     prediction = random.choice(modes)
     return prediction
 
+
 def predict_proba_classes(classes):
     counter = Counter(classes)
     n = len(counter)
-    probs = [counter.get(cl) / n for cl in counter.keys()]
+    probs = [counter[cl] / n for cl in counter.keys()]
     return probs
