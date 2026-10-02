@@ -13,5 +13,5 @@ def majority_vote(classes):
 def predict_proba_classes(classes):
     counter = Counter(classes)
     n = len(counter)
-    probs = [counter[cl] / n for cl in counter.keys()]
+    probs = {cl:counter[cl] / n for cl in counter.keys()}
     return probs
