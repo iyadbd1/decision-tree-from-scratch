@@ -8,8 +8,7 @@ def majority_vote(classes):
     ctr = Counter(classes)
     highest_count = max(ctr.values())
     modes = [item for item, count in ctr.items() if count == highest_count]
-    prediction = random.choice(modes)
-    return prediction
+    return random.choice(modes)
 
 
 def predict_proba_classes(classes):

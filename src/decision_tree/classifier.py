@@ -1,5 +1,5 @@
 from .node import DecisionTreeNode
-from utils import majority_vote, predict_proba_classes
+from .utils import majority_vote, predict_proba_classes
 import numpy as np
 
 class DecisionTreeClassifier:
@@ -23,40 +23,42 @@ class DecisionTreeClassifier:
         self.max_depth = max_depth
         self.max_nodes = max_nodes
         self.root = None
+        self.classes_ = None
 
     def fit(
         self, X_train, y_train, min_leaf_size=1, max_depth=float('inf'), max_nodes=float('inf')
-    ) -> DecisionTreeClassifier:
+    ) -> "DecisionTreeClassifier":
         """
         Builds the decision tree based on training set and hyperparameters
         """
+        X_train = np.asarray(X_train)
+        y_train = np.asarray(y_train)
 
-        # update hyperparameters
         self.min_leaf_size = min_leaf_size
         self.max_depth = max_depth
         self.max_nodes = max_nodes
-        
-        current_depth = 0
-        node_count = 0
-        self.root = DecisionTreeNode(X_train, y_train)
-        node_count += 1
-        
+        self.classes_ = np.unique(y_train)
 
-        # define a queue of nodes to split
+        queue = [(self.root, 0)]
+        self.root = DecisionTreeNode(X_train, y_train)
+        node_count = 1
+
         queue = [(self.root, 0)]
         while queue:
             current, current_depth = queue.pop(0)
 
-            # check if current node can be split
             check_depth = current_depth < max_depth
             check_size = current.size >= min_leaf_size
             check_node_count = node_count < max_nodes
             check_purity = np.unique(current.y_train).size > 1
-            
+
             can_split = check_depth and check_size and check_node_count and check_purity
-            
+
             if can_split:
-                lc, rc = current.split()
+                children = current.split()
+                if children is None:
+                    continue
+                lc, rc = children
                 lc.d = current_depth + 1
                 rc.d = current_depth + 1
                 queue.append((lc, lc.d))
@@ -68,31 +70,30 @@ class DecisionTreeClassifier:
         """
         Predicts the class of each test point by navigating the decision tree
         """
-        if not self.root:
-            raise Exception("Cannot predict before fitting the DecisionTreeClassifier")
+        if self.root is None:
+            raise ValueError("Cannot predict before fitting the DecisionTreeClassifier")
 
+        X_test = np.asarray(X_test)
         m = X_test.shape[0]
-        y_pred = np.empty(m)
+        y_pred = np.empty(m, dtype=self.classes_.dtype)
+
         for i in range(m):
-            # predict each test point's label
             current = self.root
             while current:
                 f = current.split_feat
                 t = current.split_thrs
-                
-                if not f or not t: 
+
+                if f is None or t is None:
                     y_pred[i] = majority_vote(current.y_train)
                     break
 
                 if X_test[i, f] <= t:
-                    if not current.lc:
-                        # leaf reached, perform a majority vote to find the prediction y_pred_i of X_test_i
+                    if current.lc is None:
                         y_pred[i] = majority_vote(current.y_train)
                         break
                     current = current.lc
                 else:
-                    if not current.rc:
-                        # leaf reached, perform a majority vote to find the prediction y_pred_i of X_test_i
+                    if current.rc is None:
                         y_pred[i] = majority_vote(current.y_train)
                         break
                     current = current.rc
@@ -100,35 +101,55 @@ class DecisionTreeClassifier:
 
     def predict_proba(self, X_test):
         """
-        Predicts the probability of the most likely class of each test point by navigating the decision tree
+        Predicts the probability of each class for each test point.
         """
-        if not self.root:
-            raise Exception("Cannot predict before fitting the DecisionTreeClassifier")
+        if self.root is None:
+            raise ValueError("Cannot predict before fitting the DecisionTreeClassifier")
 
+        X_test = np.asarray(X_test)
         m = X_test.shape[0]
         probs_list = []
+
         for i in range(m):
-            # predict each test point's label
             current = self.root
             while current:
                 f = current.split_feat
                 t = current.split_thrs
-                
-                if not f or not t: 
-                    probs_list.append(predict_proba_classes(current.y_train))
+
+                if f is None or t is None:
+                    leaf_probs, leaf_classes = predict_proba_classes(current.y_train)
+                    probs = np.zeros(len(self.classes_), dtype=float)
+                    for class_label, prob in zip(leaf_classes, leaf_probs):
+                        index = np.where(self.classes_ == class_label)[0]
+                        if index.size:
+                            probs[index[0]] = prob
+                    probs_list.append(probs)
                     break
 
                 if X_test[i, f] <= t:
-                    if not current.lc:
-                        # leaf reached, perform a majority vote to find the prediction y_pred_i of X_test_i
-                        probs_list.append(predict_proba_classes(current.y_train))
+                    if current.lc is None:
+                        leaf_probs, leaf_classes = predict_proba_classes(current.y_train)
+                        probs = np.zeros(len(self.classes_), dtype=float)
+                        for class_label, prob in zip(leaf_classes, leaf_probs):
+                            index = np.where(self.classes_ == class_label)[0]
+                            if index.size:
+                                probs[index[0]] = prob
+                        probs_list.append(probs)
+                        break
                     current = current.lc
                 else:
-                    if not current.rc:
-                        # leaf reached, perform a majority vote to find the prediction y_pred_i of X_test_i
-                        probs_list.append(predict_proba_classes(current.y_train))
+                    if current.rc is None:
+                        leaf_probs, leaf_classes = predict_proba_classes(current.y_train)
+                        probs = np.zeros(len(self.classes_), dtype=float)
+                        for class_label, prob in zip(leaf_classes, leaf_probs):
+                            index = np.where(self.classes_ == class_label)[0]
+                            if index.size:
+                                probs[index[0]] = prob
+                        probs_list.append(probs)
+                        break
                     current = current.rc
-        return np.array(probs_list)
+
+        return np.array(probs_list, dtype=float)
 
     def fit_predict(self, X_train, y_train, X_test, min_leaf_size=1, max_depth=float('inf'), max_nodes=float('inf')):
         return self.fit(X_train, y_train, min_leaf_size, max_depth, max_nodes).predict(X_test)

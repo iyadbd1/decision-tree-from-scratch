@@ -1,32 +1,51 @@
 # Tree-Based Models from Scratch
 
-A hands-on, from-scratch machine learning project focused on decision trees and tree-based model fundamentals. The repository implements a custom decision tree classifier, explores the design choices behind tree construction, and compares the implementation against scikit-learn on a small benchmark workflow.
+A small educational project for understanding decision trees and random-forest-style ensemble thinking without relying on a library implementation for the core algorithm.
 
 ## Overview
 
-This project was built as a learning exercise in interpretable machine learning and software engineering. The goal is not to replace production libraries, but to understand the underlying mechanics of how a decision tree grows, splits, and predicts.
+This repository contains a custom `DecisionTreeClassifier` built from first principles, along with supporting notes and a scikit-learn comparison workflow. The emphasis is on learning the mechanics of tree construction, splitting criteria, stopping rules, and prediction logic rather than production optimization.
 
-The repository currently includes:
+This project is intended to be readable, portable, and easy to evaluate in a fresh environment. It is best suited for study, portfolio use, and demonstration of core ML ideas.
 
-- a custom `DecisionTreeClassifier` built from first principles
-- a node-based tree implementation with recursive splitting logic
-- probability estimation at leaves
-- a comparison notebook using scikit-learn as a reference baseline
-- project documentation describing the problem statement, design choices, and learning notes
+## What is included
 
-## Project goals
+- `DecisionTreeClassifier` built with a sklearn-style API: `fit`, `predict`, `predict_proba`
+- node-based tree structure with recursive splitting logic
+- simple impurity-based split selection
+- a comparison notebook using `scikit-learn` as a reference baseline
+- project documentation covering the problem statement, checklist, and lessons learned
 
-- Implement decision tree logic without relying on a library model implementation
-- Use a familiar sklearn-style API (`fit`, `predict`, `predict_proba`)
-- Compare custom behavior against an established reference model
-- Keep the project understandable, portable, and easy to run from a fresh clone
+## Why this project exists
+
+This project is a learning-focused implementation of a tree-based classifier: the goal is to understand the underlying mechanics of model construction, not to compete with optimized production libraries.
+
+By the end of the workflow, you should be able to explain:
+
+- how a decision tree chooses a split
+- how impurity and stopping rules affect the final model
+- why a tree is easy to interpret but sensitive to variance
+- how a reference implementation differs from a custom one
+
+## Quick validation
+
+```bash
+python -m venv .venv
+# Windows
+.\.venv\Scripts\activate
+# macOS/Linux
+source .venv/bin/activate
+
+pip install -r requirements.txt
+pytest -q
+```
 
 ## Repository structure
 
 ```text
 .
-├── data/                          # dataset storage (empty or project-specific data files)
-├── doc/                          # project notes and specifications
+├── data/                          # dataset storage or experiment artifacts
+├── doc/                          # project documentation
 │   ├── CHECKLIST.md
 │   ├── DECISION_TREE_COMPARISON_README.md
 │   ├── Learned_Lessons.md
@@ -39,27 +58,35 @@ The repository currently includes:
 │   │   ├── classifier.py
 │   │   └── node.py
 │   └── utils.py
-├── pyproject.toml
-├── requirements.txt
+├── tests/
+│   └── test_smoke.py
 ├── .gitignore
-└── README.md
+├── LICENSE
+├── pyproject.toml
+├── README.md
+├── requirements.txt
+└── .venv/
 ```
 
 ## Installation
 
-Create and activate a virtual environment, then install the project dependencies:
+Clone the repository and set up a virtual environment:
 
 ```bash
+git clone <your-repo-url>
+cd <repo-folder>
 python -m venv .venv
+
 # Windows
 .\.venv\Scripts\activate
+
 # macOS/Linux
 source .venv/bin/activate
 
 pip install -r requirements.txt
 ```
 
-If you want to work in editable package mode from the project root:
+If you want to install the package in editable mode as well:
 
 ```bash
 pip install -e .
@@ -72,51 +99,60 @@ import numpy as np
 from decision_tree import DecisionTreeClassifier
 
 X_train = np.array([
-    [1.0, 2.0],
-    [2.0, 1.5],
-    [3.0, 3.0],
-    [4.0, 2.5],
+    [0.0, 0.0],
+    [1.0, 1.0],
+    [0.0, 1.0],
+    [1.0, 0.0],
 ])
 y_train = np.array([0, 0, 1, 1])
 
-X_test = np.array([[2.5, 2.0]])
+X_test = np.array([[0.2, 0.8], [0.9, 0.2]])
 
-model = DecisionTreeClassifier(min_leaf_size=1, max_depth=5)
+model = DecisionTreeClassifier(max_depth=3)
 model.fit(X_train, y_train)
-preds = model.predict(X_test)
-probs = model.predict_proba(X_test)
-
-print(preds)
-print(probs)
+print(model.predict(X_test))
+print(model.predict_proba(X_test))
 ```
 
-## Model details
+## Run the smoke test
 
-The custom tree follows a classic recursive partitioning approach:
+```bash
+pytest
+```
 
-- feature thresholds are evaluated greedily
-- splits are chosen by minimizing impurity
-- the implementation uses Gini impurity and entropy-based information gain logic internally
-- leaf nodes return class predictions by majority vote
-- stopping criteria are based on node size, depth, and class purity
+The smoke test checks that the package imports correctly and that a tiny trained tree can fit and predict on a simple dataset.
 
-This makes the implementation a compact, educational baseline rather than a production-optimized tree engine.
+## Notes on the implementation
 
-## Comparison workflow
+The tree follows a classic recursive partitioning pattern:
 
-The notebook in `notebooks/decision_tree_comparison.ipynb` compares the custom implementation with scikit-learn's `DecisionTreeClassifier` using the same input data and matching hyperparameters where possible. The comparison is intentionally framed as an educational benchmark: it highlights both where the custom implementation behaves well and where a library implementation is more robust and optimized.
+- evaluate candidate splits across features and thresholds
+- rank them by impurity reduction
+- stop when depth, purity, or minimum-size constraints are reached
+- use majority voting at leaf nodes for class prediction
 
-## Documentation
+This is intentionally educational rather than production-optimized.
 
-Relevant project documents are located in `doc/`:
+## Comparison and documentation
 
-- `doc/PROBLEM_STATEMENT.md` — specification and project requirements
-- `doc/CHECKLIST.md` — delivery checklist and phase tracking
-- `doc/DECISION_TREE_COMPARISON_README.md` — documentation for the comparison notebook
-- `doc/Learned_Lessons.md` — retrospective notes and implementation insights
+The notebook in `notebooks/decision_tree_comparison.ipynb` compares the custom model with scikit-learn's reference implementation on a common classification workflow. The documentation in `doc/` explains the project goals, phase plan, and lessons learned.
 
-## Notes and limitations
+## Project status
 
-This project is designed for learning and demonstration. The custom tree implementation is intentionally simpler than mature production libraries and is best suited for understanding the core mechanics of tree construction rather than for large-scale or highly optimized ML workloads.
+This repository is structured as a clean, shareable learning project and is ready for public GitHub use. It is suitable for demonstrating both the decision-tree idea and the discipline of building a small ML project from scratch.
+
+## Public release checklist
+
+Before pushing the repo publicly, confirm:
+
+- the repository is pushed to GitHub
+- the license file is included and visible
+- the README works from a fresh clone
+- the smoke test passes in CI or local setup
+- no local-only secrets, usernames, or machine-specific config are included
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 

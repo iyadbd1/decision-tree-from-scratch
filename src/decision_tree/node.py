@@ -186,32 +186,28 @@ class DecisionTreeNode:
     def split(self) -> tuple[DecisionTreeNode, DecisionTreeNode] | None:
         """
         Partitions the node according to the best split recursively until a stopping condition is reached
-        
+
         Returns:
             (DecisionTreeNode, DecisionTreeNode): left and right children after split
         """
-        
-        
-        if not self.split_feat or not self.split_thrs:
-            self.find_split()    
-        
         if self.split_feat is None or self.split_thrs is None:
-            return None 
-        
-        # Compute the mask ONCE
-        mask = self.X_train[:, self.split_feat] <= self.split_thrs
+            self.find_split()
 
-        # Use the same mask for both X and y
+        if self.split_feat is None or self.split_thrs is None:
+            return None
+
+        mask = self.X_train[:, self.split_feat] <= self.split_thrs
         X_left = self.X_train[mask]
         y_left = self.y_train[mask]
-
-        # Use the inverse mask for the right partition
         X_right = self.X_train[~mask]
         y_right = self.y_train[~mask]
-        
+
+        if X_left.size == 0 or X_right.size == 0:
+            return None
+
         self.lc = DecisionTreeNode(X_left, y_left)
         self.rc = DecisionTreeNode(X_right, y_right)
-        
+
         return (self.lc, self.rc)
     
     
