@@ -1,70 +1,69 @@
-# Decision Trees from Scratch
+# Tree-Based Models from Scratch
 
-An educational binary decision-tree classifier implemented with NumPy. The
-project makes split search, stopping conditions, tree-node structure, and
-prediction traversal explicit instead of hiding them behind a machine-learning
-framework.
+A hands-on, from-scratch machine learning project focused on decision trees and tree-based model fundamentals. The repository implements a custom decision tree classifier, explores the design choices behind tree construction, and compares the implementation against scikit-learn on a small benchmark workflow.
 
-The repository includes a reproducible comparison with
-`sklearn.tree.DecisionTreeClassifier` on the Breast Cancer Wisconsin dataset. scikit-learn is
-used for the dataset, train/test split, metrics, and reference model; it is
-not used by the implementation in [`src/decision_tree/`](./src/decision_tree/).
+## Overview
 
-## What is implemented
+This project was built as a learning exercise in interpretable machine learning and software engineering. The goal is not to replace production libraries, but to understand the underlying mechanics of how a decision tree grows, splits, and predicts.
 
-- `DecisionTreeClassifier.fit(X_train, y_train)` and `.predict(X_test)`
-- `fit_predict(X_train, y_train, X_test)`
-- `predict_proba(X_test)`, returning a NumPy object array of per-leaf
-  class-probability dictionaries
-- Gini-impurity split search, with information gain available through
-  `DecisionTreeNode.find_split(split_method="ig")`
-- Breadth-first tree growth with `min_leaf_size`, `max_depth`, and `max_nodes`
-  stopping controls
-- Deterministic majority-class predictions (ties select the first class
-  encountered)
-- Tree inspection helpers: `depth()`, `count_nodes()`, and stored split
-  criteria
+The repository currently includes:
 
-This is a learning project, not a drop-in replacement for scikit-learn. It
-currently supports dense numeric NumPy arrays and classification labels. It
-does not implement categorical features, missing-value handling, pruning,
-feature importances, or random forests.
+- a custom `DecisionTreeClassifier` built from first principles
+- a node-based tree implementation with recursive splitting logic
+- probability estimation at leaves
+- a comparison notebook using scikit-learn as a reference baseline
+- project documentation describing the problem statement, design choices, and learning notes
 
-## Project layout
+## Project goals
+
+- Implement decision tree logic without relying on a library model implementation
+- Use a familiar sklearn-style API (`fit`, `predict`, `predict_proba`)
+- Compare custom behavior against an established reference model
+- Keep the project understandable, portable, and easy to run from a fresh clone
+
+## Repository structure
 
 ```text
-src/decision_tree/       Classifier and tree-node implementation
-src/utils.py             Majority-vote and leaf-probability helpers
-notebooks/               Reproducible Breast Cancer comparison
-doc/                     Project specification and lessons learned
-requirements.txt         Runtime dependencies for the notebook
-pyproject.toml            Package metadata and editable-install configuration
-LICENSE                  MIT License
+.
+├── data/                          # dataset storage (empty or project-specific data files)
+├── doc/                          # project notes and specifications
+│   ├── CHECKLIST.md
+│   ├── DECISION_TREE_COMPARISON_README.md
+│   ├── Learned_Lessons.md
+│   └── PROBLEM_STATEMENT.md
+├── notebooks/
+│   └── decision_tree_comparison.ipynb
+├── src/
+│   ├── decision_tree/
+│   │   ├── __init__.py
+│   │   ├── classifier.py
+│   │   └── node.py
+│   └── utils.py
+├── pyproject.toml
+├── requirements.txt
+├── .gitignore
+└── README.md
 ```
 
 ## Installation
 
-Python 3.9 or newer is required.
+Create and activate a virtual environment, then install the project dependencies:
 
 ```bash
-git clone https://github.com/iyadbd1/tree-based-models-from-scratch.git
-cd tree-based-models-from-scratch
 python -m venv .venv
-
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
-
+# Windows
+.\.venv\Scripts\activate
 # macOS/Linux
-# source .venv/bin/activate
+source .venv/bin/activate
 
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m pip install -e .
+pip install -r requirements.txt
 ```
 
-The editable install makes the `decision_tree` package importable from scripts
-and notebooks. The same runtime dependencies are declared in `pyproject.toml`
-for package installation.
+If you want to work in editable package mode from the project root:
+
+```bash
+pip install -e .
+```
 
 ## Quick start
 
@@ -72,82 +71,52 @@ for package installation.
 import numpy as np
 from decision_tree import DecisionTreeClassifier
 
-X = np.array([[0.0], [0.2], [1.0], [1.2]])
-y = np.array([0, 0, 1, 1])
+X_train = np.array([
+    [1.0, 2.0],
+    [2.0, 1.5],
+    [3.0, 3.0],
+    [4.0, 2.5],
+])
+y_train = np.array([0, 0, 1, 1])
 
-model = DecisionTreeClassifier()
-model.fit(X, y, max_depth=2)
-print(model.predict(np.array([[0.1], [1.1]])))
+X_test = np.array([[2.5, 2.0]])
+
+model = DecisionTreeClassifier(min_leaf_size=1, max_depth=5)
+model.fit(X_train, y_train)
+preds = model.predict(X_test)
+probs = model.predict_proba(X_test)
+
+print(preds)
+print(probs)
 ```
 
-The constructor and `fit` expose the same training controls. Pass them to
-`fit` when training a model:
+## Model details
 
-```python
-model.fit(
-    X,
-    y,
-    min_leaf_size=1,
-    max_depth=float("inf"),
-    max_nodes=float("inf"),
-)
-```
+The custom tree follows a classic recursive partitioning approach:
 
-`min_leaf_size` is the minimum number of samples required for a node to be
-considered for splitting. It is not the same as scikit-learn's
-`min_samples_leaf`, which constrains both children after a split.
+- feature thresholds are evaluated greedily
+- splits are chosen by minimizing impurity
+- the implementation uses Gini impurity and entropy-based information gain logic internally
+- leaf nodes return class predictions by majority vote
+- stopping criteria are based on node size, depth, and class purity
 
-## Reproducing the comparison
+This makes the implementation a compact, educational baseline rather than a production-optimized tree engine.
 
-Open [`notebooks/decision_tree_classifier.ipynb`](./notebooks/decision_tree_classifier.ipynb)
-and run all cells. The notebook:
+## Comparison workflow
 
-1. Loads the Breast Cancer Wisconsin dataset and creates one fixed, stratified
-   80/20 train/test split.
-2. Fits both models with Gini impurity and `max_depth=5`.
-3. Reports test accuracy, exact prediction agreement, depth, node count, and
-   confusion matrices.
-4. Explains what the comparison does and does not establish.
+The notebook in `notebooks/decision_tree_comparison.ipynb` compares the custom implementation with scikit-learn's `DecisionTreeClassifier` using the same input data and matching hyperparameters where possible. The comparison is intentionally framed as an educational benchmark: it highlights both where the custom implementation behaves well and where a library implementation is more robust and optimized.
 
-The comparison is intentionally honest. Both models optimize the same
-high-level criterion, but their tie-breaking, split-search details, stopping
-semantics, tree-growth strategy, and probability-output conventions differ.
-Matching accuracy alone is therefore not proof that the implementations are
-structurally identical.
+## Documentation
 
-## Development checks
+Relevant project documents are located in `doc/`:
 
-Install the optional development dependency and run any tests present in the
-checkout with:
+- `doc/PROBLEM_STATEMENT.md` — specification and project requirements
+- `doc/CHECKLIST.md` — delivery checklist and phase tracking
+- `doc/DECISION_TREE_COMPARISON_README.md` — documentation for the comparison notebook
+- `doc/Learned_Lessons.md` — retrospective notes and implementation insights
 
-```bash
-python -m pip install -e ".[dev]"
-python -m pytest
-```
+## Notes and limitations
 
-The notebook is the primary executable demonstration and should be run from
-the repository with the editable package installed.
+This project is designed for learning and demonstration. The custom tree implementation is intentionally simpler than mature production libraries and is best suited for understanding the core mechanics of tree construction rather than for large-scale or highly optimized ML workloads.
 
-## Design notes
 
-The original implementation bugs and their fixes are documented in
-[`doc/lessons_learned/dt_classifier_bug_report.md`](./doc/lessons_learned/dt_classifier_bug_report.md).
-The broader project specification and completion checklist are in
-[`doc/PROBLEM_STATEMENT.md`](./doc/PROBLEM_STATEMENT.md) and
-[`doc/CHECKLIST.md`](./doc/CHECKLIST.md).
-
-## Publishing checklist
-
-Before changing the GitHub repository visibility to public:
-
-1. Run the installation instructions in a clean virtual environment.
-2. Run the notebook from top to bottom and confirm its outputs are reproducible.
-3. Run `python -m pytest` and review any failures.
-4. Confirm that `.gitignore` excludes virtual environments, caches, secrets, and
-   notebook checkpoints.
-5. Review the staged diff to ensure no local data, credentials, or generated
-   artifacts are included.
-6. Push the intended branch to GitHub, then set the repository description to
-   **“An educational binary decision-tree classifier implemented from scratch with NumPy.”**
-7. Suggested topics: `machine-learning`, `decision-tree`, `numpy`, `scikit-learn`,
-   `python`, `from-scratch`.

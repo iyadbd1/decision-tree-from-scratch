@@ -10,12 +10,12 @@
 - Python package creation and structure
 - Python decorators
 - OOP revision
-- docstring documentation
+- Python docstring documentation
 - pytest overview
 
 ## Environment
 
-- Git revision: initialization, git workflow and .gitignore
+- Git: initialization, git workflow and .gitignore
 - Virtual environment setup
 - ML project structure
 - pip
