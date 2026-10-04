@@ -6,7 +6,7 @@ prediction traversal explicit instead of hiding them behind a machine-learning
 framework.
 
 The repository includes a reproducible comparison with
-`sklearn.tree.DecisionTreeClassifier` on the Iris dataset. scikit-learn is
+`sklearn.tree.DecisionTreeClassifier` on the Breast Cancer Wisconsin dataset. scikit-learn is
 used for the dataset, train/test split, metrics, and reference model; it is
 not used by the implementation in [`src/decision_tree/`](./src/decision_tree/).
 
@@ -35,7 +35,7 @@ feature importances, or random forests.
 ```text
 src/decision_tree/       Classifier and tree-node implementation
 src/utils.py             Majority-vote and leaf-probability helpers
-notebooks/               Reproducible Iris comparison
+notebooks/               Reproducible Breast Cancer comparison
 doc/                     Project specification and lessons learned
 requirements.txt         Runtime dependencies for the notebook
 pyproject.toml            Package metadata and editable-install configuration
@@ -102,13 +102,12 @@ considered for splitting. It is not the same as scikit-learn's
 Open [`notebooks/decision_tree_classifier.ipynb`](./notebooks/decision_tree_classifier.ipynb)
 and run all cells. The notebook:
 
-1. Loads Iris and creates one fixed, stratified 80/20 train/test split.
-2. Fits both models with Gini impurity and matching depth limits.
-3. Reports accuracy, exact prediction agreement, depth, and node count.
-4. Sweeps depths 1 through 5 to avoid relying on one favorable fit.
-5. Shows confusion matrices and the original Iris rows where predictions
-   differ.
-6. Explains why close agreement is expected but exact equality is not.
+1. Loads the Breast Cancer Wisconsin dataset and creates one fixed, stratified
+   80/20 train/test split.
+2. Fits both models with Gini impurity and `max_depth=5`.
+3. Reports test accuracy, exact prediction agreement, depth, node count, and
+   confusion matrices.
+4. Explains what the comparison does and does not establish.
 
 The comparison is intentionally honest. Both models optimize the same
 high-level criterion, but their tie-breaking, split-search details, stopping
@@ -152,7 +151,3 @@ Before changing the GitHub repository visibility to public:
    **“An educational binary decision-tree classifier implemented from scratch with NumPy.”**
 7. Suggested topics: `machine-learning`, `decision-tree`, `numpy`, `scikit-learn`,
    `python`, `from-scratch`.
-
-## License
-
-Released under the [MIT License](./LICENSE).
